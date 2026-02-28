@@ -1,4 +1,4 @@
-ALTER TABLE products ADD COLUMN category_id INTEGER REFERENCES product_categories(id);
+ALTER TABLE products ADD COLUMN category_id INTEGER REFERENCES product_categories(id); -- TODO(rafael.nunes): maybe set this column to not null in the future?
 
 INSERT INTO product_categories (code, name) VALUES
 ('clothing', 'Clothing'),
@@ -9,4 +9,8 @@ UPDATE products SET category_id = (SELECT id FROM product_categories WHERE code 
 UPDATE products SET category_id = (SELECT id FROM product_categories WHERE code = 'shoes') WHERE code IN ('PROD002', 'PROD006');
 UPDATE products SET category_id = (SELECT id FROM product_categories WHERE code = 'accessories') WHERE code IN ('PROD003', 'PROD005', 'PROD008');
 
-CREATE VIEW vw_products AS SELECT p.code, pc.name, p.price FROM products p INNER JOIN product_categories pc ON p.category_id = pc.id;
+CREATE OR REPLACE VIEW vw_products AS
+SELECT
+    p.code, pc.name, p.price
+FROM products p
+INNER JOIN product_categories pc ON p.category_id = pc.id;
