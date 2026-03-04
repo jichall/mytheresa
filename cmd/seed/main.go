@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -13,24 +13,34 @@ import (
 )
 
 func main() {
-	// Load environment variables from .env file
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	// load environment variables from .env file
 	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf("Error loading .env file: %s", err)
+		logger.Error("failed to load .env file", slog.Any("error", err))
+		os.Exit(1)
 	}
 
-	// Initialize database connection
-	db, close := database.New(
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB"),
-		os.Getenv("POSTGRES_PORT"),
-	)
-	defer close()
+	// initialize database connection
+	db, err := database.New(&database.DatabaseOptions{
+		User:     os.Getenv("POSTGRES_USER"),
+		Password: os.Getenv("POSTGRES_PASSWORD"),
+		Name:     os.Getenv("POSTGRES_DB"),
+		Port:     os.Getenv("POSTGRES_PORT"),
+		Logger:   logger,
+	})
+	if err != nil {
+		logger.Error("failed to open database connection", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	defer db.Close()
 
 	dir := os.Getenv("POSTGRES_SQL_DIR")
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		log.Fatalf("reading directory failed: %v", err)
+		logger.Error("failed to read directory", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	// Filter and sort .sql files
@@ -49,21 +59,21 @@ func main() {
 
 		// skip over specific files
 		if strings.HasPrefix(file.Name(), "#") {
-			log.Println("skipping " + file.Name() + " successfully")
+			logger.Info("skipping " + file.Name() + " successfully")
 			continue
 		}
 
 		content, err := os.ReadFile(path)
 		if err != nil {
-			log.Printf("reading file %s failed: %v", file.Name(), err)
+			logger.Error("failed to read .sql file", slog.String("file", file.Name()), slog.Any("error", err))
 		}
 
 		sql := string(content)
-		if err := db.Exec(sql).Error; err != nil {
-			log.Printf("executing %s failed: %v", file.Name(), err)
+		if err := db.GORM().Exec(sql).Error; err != nil {
+			logger.Error("failed to execute SQL instruction", slog.String("file", file.Name()), slog.Any("error", err))
 			return
 		}
 
-		log.Printf("executed %s successfully\n", file.Name())
+		logger.Info("SQL file execute successfully", slog.String("file", file.Name()))
 	}
 }
