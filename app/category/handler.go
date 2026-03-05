@@ -87,8 +87,10 @@ func (c *CategoryHandler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 
 	category := Category{}
 
+	// the validation should've been happening at the decoder level, or using struct tags to clear the
+	// possible clutter of validation logic
 	err = json.Unmarshal(data, &category)
-	if err != nil {
+	if err != nil || (category.Code == "" && category.Name == "") {
 		c.logger.Error("failed to parse request object", slog.Any("error", err), slog.String("data", string(data)))
 		api.RespondError(w, api.Response{Status: http.StatusBadRequest, Message: "invalid input model"})
 
