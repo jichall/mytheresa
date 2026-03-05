@@ -56,7 +56,7 @@ func New(opts *ServerOpts) *Server {
 	cateRepo := models.NewCategoryRepository(s.db.GORM())
 
 	cata := catalog.NewCatalogHandler(&catalog.CatalogHandlerOpts{Repository: prodRepo, Logger: opts.Logger})
-	cate := category.NewCatalogHandler(&category.CategoryHandlerOpts{Repository: cateRepo, Logger: opts.Logger})
+	cate := category.NewCategoryHandler(&category.CategoryHandlerOpts{Repository: cateRepo, Logger: opts.Logger})
 
 	// set up routing
 	mux := http.NewServeMux()

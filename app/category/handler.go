@@ -22,7 +22,7 @@ type CategoryHandlerOpts struct {
 	Logger     *slog.Logger
 }
 
-func NewCatalogHandler(opts *CategoryHandlerOpts) *CategoryHandler {
+func NewCategoryHandler(opts *CategoryHandlerOpts) *CategoryHandler {
 	return &CategoryHandler{
 		repository: opts.Repository,
 		logger:     opts.Logger,
