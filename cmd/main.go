@@ -1,3 +1,8 @@
+// @title Mytheresa
+// @version 1.0
+// @description The API used to interact with the catalog, including products, variants and categories.
+// @host localhost:8080
+// @BasePath /
 package main
 
 import (

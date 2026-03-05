@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -28,7 +29,12 @@ func NewCatalogHandler(opts *CatalogHandlerOpts) *CatalogHandler {
 	}
 }
 
-// HandleGetByCode returns a specific product or none
+// GetByCode godoc
+// @Summary Returns a specific product from the catalog or none if not found
+// @Tags catalog
+// @Success 200 {object} Product
+// @Failure 404 {object} api.Response
+// @Router /catalog/{code} [get]
 func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 
@@ -38,7 +44,13 @@ func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request)
 	res, err := h.repository.GetByCode(ctx, code)
 	if err != nil {
 		h.logger.Error("failed to get product by code", slog.String("code", code))
-		api.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		api.RespondError(w, api.Response{Status: http.StatusInternalServerError, Error: err.Error()})
+
+		return
+	}
+
+	if res == nil {
+		api.RespondError(w, api.Response{Status: http.StatusNotFound, Message: fmt.Sprintf("product with code [%s] not found", code)})
 
 		return
 	}
@@ -64,16 +76,21 @@ func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request)
 		Variants: variants,
 	}
 
-	api.OKResponse(w, product)
+	api.RespondOK(w, product)
 }
 
-// HandleGet returns products to the client based off of a filter to page results nicely
+// HandleGet godoc
+// @Summary Returns products in a paged format
+// @Tags catalog
+// @Success 200 {object} []Product
+// @Failure 404 {object} api.Response
+// @Router /catalog [get]
 func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	filter := &ProductFilter{}
 
 	if err := filter.parse(r); err != nil {
 		slog.Error("failed to parse query parameters", slog.Any("error", err))
-		api.ErrorResponse(w, http.StatusBadRequest, "invalid query parameters")
+		api.RespondError(w, api.Response{Status: http.StatusBadRequest, Message: "invalid query parameter(s)"})
 
 		return
 	}
@@ -84,6 +101,12 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	res, err := h.repository.GetPaged(ctx, filter.Page, filter.Limit)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(res) == 0 {
+		api.RespondError(w, api.Response{Status: http.StatusNotFound, Message: fmt.Sprintf("products were not found")})
+
 		return
 	}
 
@@ -103,5 +126,5 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 		Filter:   &ResponseFilter{Offset: filter.Page, Limit: filter.Limit},
 	}
 
-	api.OKResponse(w, response)
+	api.RespondOK(w, response)
 }

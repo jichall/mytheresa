@@ -29,7 +29,12 @@ func NewCatalogHandler(opts *CategoryHandlerOpts) *CategoryHandler {
 	}
 }
 
-// HandleGet returns all categories in the database
+// GetCategory godoc
+// @Summary Get all available categories
+// @Tags categories
+// @Success 200 {object} Category
+// @Failure 404 {object} api.Response
+// @Router /categories [get]
 func (c *CategoryHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -37,7 +42,13 @@ func (c *CategoryHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	res, err := c.repository.GetAll(ctx)
 	if err != nil {
 		c.logger.Error("failed to get all categories", slog.Any("error", err))
-		api.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		api.RespondError(w, api.Response{Status: http.StatusInternalServerError, Error: err.Error()})
+
+		return
+	}
+
+	if len(res) == 0 {
+		api.RespondError(w, api.Response{Status: http.StatusNotFound, Message: "no available category"})
 
 		return
 	}
@@ -51,10 +62,16 @@ func (c *CategoryHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	api.OKResponse(w, categories)
+	api.RespondOK(w, categories)
 }
 
-// HandleCreate creates a new category and persists it into the database
+// CreateCategory godoc
+// @Summary Create a new category
+// @Tags categories
+// @Success 201
+// @Failure 400 {object} api.Response
+// @Failure 503 {object} api.Response
+// @Router /categories [post]
 func (c *CategoryHandler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -62,7 +79,7 @@ func (c *CategoryHandler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		c.logger.Error("failed to read request body", slog.Any("error", err))
-		api.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		api.RespondError(w, api.Response{Status: http.StatusInternalServerError, Error: err.Error()})
 
 		return
 	}
@@ -73,7 +90,7 @@ func (c *CategoryHandler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(data, &category)
 	if err != nil {
 		c.logger.Error("failed to parse request object", slog.Any("error", err), slog.String("data", string(data)))
-		api.ErrorResponse(w, http.StatusBadRequest, "invalid input model")
+		api.RespondError(w, api.Response{Status: http.StatusBadRequest, Message: "invalid input model"})
 
 		return
 	}
@@ -81,10 +98,10 @@ func (c *CategoryHandler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	err = c.repository.Save(ctx, &models.Category{Code: category.Code, Name: category.Name})
 	if err != nil {
 		c.logger.Error("failed to persist data", slog.Any("error", err))
-		api.ErrorResponse(w, http.StatusServiceUnavailable, "failed to persist data, try again")
+		api.RespondError(w, api.Response{Status: http.StatusServiceUnavailable, Message: "failed to persist data, try again"})
 
 		return
 	}
 
-	api.Response(w, http.StatusCreated, nil)
+	api.RespondCustom(w, http.StatusCreated, nil)
 }

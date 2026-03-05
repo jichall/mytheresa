@@ -6,6 +6,9 @@ import (
 	"log/slog"
 	"net/http"
 
+	_ "github.com/mytheresa/go-hiring-challenge/docs"
+	swagger "github.com/swaggo/http-swagger"
+
 	"github.com/mytheresa/go-hiring-challenge/app/catalog"
 	"github.com/mytheresa/go-hiring-challenge/app/category"
 	"github.com/mytheresa/go-hiring-challenge/app/database"
@@ -62,6 +65,12 @@ func New(opts *ServerOpts) *Server {
 
 	mux.HandleFunc("GET /categories", cate.HandleGet)
 	mux.HandleFunc("POST /categories", cate.HandleCreate)
+
+	// routing for swagger files
+	mux.Handle("/swagger/", swagger.Handler(
+		swagger.URL("http://localhost:8080/swagger/doc.json"),
+	))
+	mux.Handle("/swagger/docs.json", http.FileServer(http.Dir("./docs")))
 
 	// set up the HTTP server
 	s.httpsrv = &http.Server{

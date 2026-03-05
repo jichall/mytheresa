@@ -5,19 +5,25 @@ import (
 	"net/http"
 )
 
-// OKResponse returns a JSON encoded response data with a 200 status code
-func OKResponse(w http.ResponseWriter, data any) {
+type Response struct {
+	Status  int    `json:"status"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
+
+// RespondOK returns a JSON encoded response data with a 200 status code
+func RespondOK(w http.ResponseWriter, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	err := json.NewEncoder(w).Encode(data)
 	if err != nil {
-		ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		RespondError(w, Response{Status: http.StatusInternalServerError, Error: err.Error()})
 	}
 }
 
 // Custom response writer with a status along side data
-func Response(w http.ResponseWriter, status int, data any) {
+func RespondCustom(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
@@ -27,21 +33,13 @@ func Response(w http.ResponseWriter, status int, data any) {
 	}
 }
 
-// ErrorResponse writes a custom JSON as an error response for the client
+// RespondError writes a custom JSON as an error response for the client
 // and if that doesn't work it will return a plain internal server error status
-func ErrorResponse(w http.ResponseWriter, status int, message string) {
+func RespondError(w http.ResponseWriter, data Response) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
+	w.WriteHeader(data.Status)
 
-	m := struct {
-		Status  int
-		Message string
-	}{
-		Status:  status,
-		Message: message,
-	}
-
-	err := json.NewEncoder(w).Encode(m)
+	err := json.NewEncoder(w).Encode(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
