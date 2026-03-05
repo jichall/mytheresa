@@ -37,7 +37,8 @@ func (r *ProductsRepository) GetPaged(ctx context.Context, page, size int) ([]Pr
 		return nil, err
 	}
 
-	offset := (page - 1) * size
+	// it's indexed at 0
+	offset := page * size
 
 	err := r.db.Preload("Variants").Preload("Category").Limit(size).Offset(offset).Order("ID desc").Find(&products).Error
 	if err != nil {
