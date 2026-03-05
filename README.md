@@ -6,7 +6,7 @@ This repository contains a Go application for managing products and their prices
 
 1. **cmd/**: Contains the main application and seed command entry points.
 
-   - `server/main.go`: The main application entry point, serves the REST API.
+   - `main.go`: The main application entry point, it initializes andserves the REST API.
    - `seed/main.go`: Command to seed the database with initial product data.
 
 2. **app/**: Contains the application logic.
