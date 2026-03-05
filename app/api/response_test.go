@@ -32,7 +32,7 @@ func TestResponse(t *testing.T) {
 
 	t.Run("sucessfull http 201 json response", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
-		Response(recorder, http.StatusCreated, sample)
+		RespondCustom(recorder, http.StatusCreated, sample)
 
 		assert.Equal(t, http.StatusCreated, recorder.Code, "Expected status code 201")
 		assert.Equal(t, "application/json", recorder.Header().Get("Content-Type"), "Expected Content-Type to be application/json")
@@ -45,12 +45,12 @@ func TestResponse(t *testing.T) {
 func TestErrorResponse(t *testing.T) {
 	t.Run("json response for a given http status code", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
-		RespondError(recorder, http.StatusInternalServerError, "Some error occurred")
+		RespondError(recorder, Response{Status: http.StatusInternalServerError, Message: "some error occurred"})
 
 		assert.Equal(t, http.StatusInternalServerError, recorder.Code, "Expected status code 500 Internal Server Error")
 		assert.Equal(t, "application/json", recorder.Header().Get("Content-Type"), "Expected Content-Type to be application/json")
 
-		expected := `{"error":"Some error occurred"}`
+		expected := `{"status": 500, "message":"some error occurred"}`
 		assert.JSONEq(t, expected, recorder.Body.String(), "Response body does not match expected")
 	})
 }
