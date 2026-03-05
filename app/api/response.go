@@ -27,9 +27,17 @@ func RespondCustom(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	err := json.NewEncoder(w).Encode(data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// to avoid writing newline characters at the end of the response if data is nil,
+	// as this method is called we might spend a lot of network traffic to just send
+	// useless data.
+	//
+	// the best way though would be to implement an encoder that doesn't write a newline
+	// character at the end of the response, but this is beyond what's being asked.
+	if data != nil {
+		err := json.NewEncoder(w).Encode(data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
