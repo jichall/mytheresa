@@ -46,6 +46,15 @@ info:
 paths:
   /catalog:
     get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
       responses:
         "200":
           description: OK
@@ -89,6 +98,8 @@ paths:
       tags:
       - categories
     post:
+      consumes:
+      - application/json
       responses:
         "201":
           description: Created

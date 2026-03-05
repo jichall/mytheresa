@@ -21,6 +21,20 @@ const docTemplate = `{
                     "catalog"
                 ],
                 "summary": "Returns products in a paged format",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -84,6 +98,9 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "consumes": [
+                    "application/json"
+                ],
                 "tags": [
                     "categories"
                 ],
@@ -178,6 +195,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "The API used to interact with the catalog, including products, variants and categories.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

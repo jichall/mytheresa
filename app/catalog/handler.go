@@ -32,6 +32,8 @@ func NewCatalogHandler(opts *CatalogHandlerOpts) *CatalogHandler {
 // GetByCode godoc
 // @Summary Returns a specific product from the catalog or none if not found
 // @Tags catalog
+// @Produce json
+// @Param code path string true "product code"
 // @Success 200 {object} Product
 // @Failure 404 {object} api.Response
 // @Router /catalog/{code} [get]
@@ -82,6 +84,9 @@ func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request)
 // HandleGet godoc
 // @Summary Returns products in a paged format
 // @Tags catalog
+// @Param page query int false "page number (index at 0)"
+// @Param limit query int false "number of items per page"
+// @Produce json
 // @Success 200 {object} []Product
 // @Failure 404 {object} api.Response
 // @Router /catalog [get]

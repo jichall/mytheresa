@@ -32,6 +32,7 @@ func NewCategoryHandler(opts *CategoryHandlerOpts) *CategoryHandler {
 // GetCategory godoc
 // @Summary Get all available categories
 // @Tags categories
+// @Produce json
 // @Success 200 {object} Category
 // @Failure 404 {object} api.Response
 // @Router /categories [get]
@@ -68,6 +69,7 @@ func (c *CategoryHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 // CreateCategory godoc
 // @Summary Create a new category
 // @Tags categories
+// @Accept json
 // @Success 201
 // @Failure 400 {object} api.Response
 // @Failure 503 {object} api.Response
