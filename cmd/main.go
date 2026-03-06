@@ -31,7 +31,7 @@ func main() {
 
 	// initialize custom logger
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: false, // nicety to have when looking through logs on a production service
+		AddSource: false, // nice to have when looking through logs on a production service
 		Level:     logger.From(*level),
 	}))
 
