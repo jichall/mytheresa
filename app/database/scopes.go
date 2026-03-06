@@ -30,15 +30,15 @@ type PriceFilter struct {
 func (pf *PriceFilter) Apply(db *gorm.DB) *gorm.DB {
 	switch pf.Operator {
 	case "gt":
-		return db.Where("price > ?", pf.Price)
+		return db.Where("price > $1", pf.Price)
 	case "gte":
-		return db.Where("price >= ?", pf.Price)
+		return db.Where("price >= $1", pf.Price)
 	case "lt":
-		return db.Where("price < ?", pf.Price)
+		return db.Where("price < $1", pf.Price)
 	case "lte":
-		return db.Where("price <= ?", pf.Price)
+		return db.Where("price <= $1", pf.Price)
 	case "eq":
-		return db.Where("price = ?", pf.Price)
+		return db.Where("price = $1", pf.Price)
 	default:
 		return db
 	}
@@ -55,9 +55,11 @@ type CategoryFilter struct {
 func (cf *CategoryFilter) Apply(db *gorm.DB) *gorm.DB {
 	if len(cf.Categories) == 0 {
 		return db
+	} else if len(cf.Categories) == 1 {
+		return db.Joins("Category").Where(`"Category".code = ?`, cf.Categories[0])
 	}
 
-	return db.Where("category IN (?)", cf.Categories)
+	return db.Joins("Category").Where(`"Category".code IN (?)`, cf.Categories)
 }
 
 func (cf *CategoryFilter) Ordering() Order {
@@ -74,5 +76,5 @@ func (pf *PageFilter) Apply(db *gorm.DB) *gorm.DB {
 }
 
 func (pf *PageFilter) Ordering() Order {
-	return 0
+	return 2
 }

@@ -30,7 +30,7 @@ type DatabaseOptions struct {
 func New(opts *DatabaseOptions) (*Database, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@localhost:%s/%s?sslmode=disable", opts.User, opts.Password, opts.Port, opts.Name)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{}) //TODO(rafael.nunes): set up the logger for GORM to use the app's logger (though it needs to implement the logger.Interface)
 	if err != nil {
 		opts.Logger.Error("failed to connect to database", slog.Any("error", err))
 		return nil, err
