@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mytheresa/go-hiring-challenge/app/api"
+	"github.com/mytheresa/go-hiring-challenge/app/catalog/filter"
 	"github.com/mytheresa/go-hiring-challenge/models"
 	"github.com/shopspring/decimal"
 )
@@ -91,19 +92,27 @@ func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request)
 // @Failure 404 {object} api.Response
 // @Router /catalog [get]
 func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
-	filter := &ProductFilter{}
+	filters := filter.FilterMap{
+		"page":     &filter.PageFilter{},
+		"price":    &filter.PriceFilter{},
+		"category": &filter.PriceFilter{},
+	}
 
-	if err := filter.parse(r); err != nil {
-		slog.Error("failed to parse query parameters", slog.Any("error", err))
-		api.RespondError(w, api.Response{Status: http.StatusBadRequest, Message: "invalid query parameter(s)"})
+	// the idea here is only error for the client if it has provided an invalid value
+	// for a filter, but whatever parameter not used by this endpoint is disregarded.
+	for _, filter := range filters {
+		if err := filter.Parse(r); err != nil {
+			slog.Error("failed to parse query parameters", slog.Any("error", err))
+			api.RespondError(w, api.Response{Status: http.StatusBadRequest, Message: "invalid query parameter(s)"})
 
-		return
+			return
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	res, err := h.repository.GetPaged(ctx, filter.Page, filter.Limit)
+	res, err := h.repository.GetWithFilters(ctx, filters.List().Translate())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,9 +135,10 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	page := filters["page"].(*filter.PageFilter) // cumbersome because of the indirection layer I built but...
 	response := Response{
 		Products: products,
-		Filter:   &ResponseFilter{Offset: filter.Page, Limit: filter.Limit},
+		Filter:   &ResponseFilter{Number: page.Page, Size: page.Size},
 	}
 
 	api.RespondOK(w, response)

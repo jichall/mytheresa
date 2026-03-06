@@ -6,8 +6,8 @@ type Response struct {
 }
 
 type ResponseFilter struct {
-	Offset int `json:"offset"`
-	Limit  int `json:"limit"`
+	Number int `json:"number"`
+	Size   int `json:"size"`
 }
 
 type Product struct {
