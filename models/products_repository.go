@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/mytheresa/go-hiring-challenge/app/database"
 	"gorm.io/gorm"
 )
 
@@ -41,6 +42,24 @@ func (r *ProductsRepository) GetPaged(ctx context.Context, page, size int) ([]Pr
 	offset := page * size
 
 	err := r.db.Preload("Variants").Preload("Category").Limit(size).Offset(offset).Order("ID desc").Find(&products).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func (r *ProductsRepository) GetWithFilters(ctx context.Context, filters []database.Filter) ([]Product, error) {
+	var products []Product
+
+	tx := r.db.Preload("Variants").Preload("Category")
+
+	database.Sort(filters)
+	for _, scope := range filters {
+		scope.Apply(tx)
+	}
+
+	err := tx.Find(&products).Error
 	if err != nil {
 		return nil, err
 	}

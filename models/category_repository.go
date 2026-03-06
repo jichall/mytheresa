@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 
+	"github.com/mytheresa/go-hiring-challenge/app/database"
 	"gorm.io/gorm"
 )
 
@@ -39,6 +40,24 @@ func (c *CategoryRepository) GetPaged(ctx context.Context, page, size int) ([]Ca
 	offset := (page - 1) * size
 
 	err := c.db.Limit(size).Offset(offset).Order("ID desc").Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
+}
+
+func (r *CategoryRepository) GetWithFilters(ctx context.Context, filters []database.Filter) ([]Category, error) {
+	var categories []Category
+
+	tx := r.db
+
+	database.Sort(filters)
+	for _, scope := range filters {
+		scope.Apply(tx)
+	}
+
+	err := tx.Find(&categories).Error
 	if err != nil {
 		return nil, err
 	}
