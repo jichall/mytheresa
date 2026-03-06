@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mytheresa/go-hiring-challenge/app/database"
 	"github.com/mytheresa/go-hiring-challenge/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -100,6 +101,10 @@ func (m *mockrepo) GetAll(ctx context.Context) ([]models.Category, error) {
 }
 
 func (m *mockrepo) GetPaged(ctx context.Context, page, limit int) ([]models.Category, error) {
+	return []models.Category{}, nil
+}
+
+func (m *mockrepo) GetWithFilters(ctx context.Context, filters []database.Filter) ([]models.Category, error) {
 	return []models.Category{}, nil
 }
 
