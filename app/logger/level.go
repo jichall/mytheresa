@@ -13,8 +13,6 @@ func From(level string) slog.Level {
 		l = slog.LevelWarn
 	case "error":
 		l = slog.LevelError
-	default:
-		l = slog.LevelInfo
 	}
 
 	return l
