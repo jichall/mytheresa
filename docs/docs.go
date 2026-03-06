@@ -17,6 +17,9 @@ const docTemplate = `{
     "paths": {
         "/catalog": {
             "get": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "catalog"
                 ],
@@ -24,14 +27,32 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "description": "page number (index at 0)",
+                        "name": "offset",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Number of items per page",
+                        "description": "number of items per page",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "a single or multiple category code separated by commas",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "a float value, used in conjunction with the price operator",
+                        "name": "price",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "the price operator, one of: eq, lt, lte, gte",
+                        "name": "operator",
                         "in": "query"
                     }
                 ],
@@ -56,10 +77,22 @@ const docTemplate = `{
         },
         "/catalog/{code}": {
             "get": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "catalog"
                 ],
                 "summary": "Returns a specific product from the catalog or none if not found",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "product code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -78,6 +111,9 @@ const docTemplate = `{
         },
         "/categories": {
             "get": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "categories"
                 ],

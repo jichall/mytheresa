@@ -85,8 +85,11 @@ func (h *CatalogHandler) HandleGetByCode(w http.ResponseWriter, r *http.Request)
 // HandleGet godoc
 // @Summary Returns products in a paged format
 // @Tags catalog
-// @Param page query int false "page number (index at 0)"
+// @Param offset query int false "page number (index at 0)"
 // @Param limit query int false "number of items per page"
+// @Param category query string false "a single or multiple category code separated by commas"
+// @Param price query string false "a float value, used in conjunction with the price operator"
+// @Param operator query string false "the price operator, one of: eq, lt, lte, gt, gte"
 // @Produce json
 // @Success 200 {object} []Product
 // @Failure 404 {object} api.Response

@@ -47,14 +47,28 @@ paths:
   /catalog:
     get:
       parameters:
-      - description: Page number
+      - description: page number (index at 0)
         in: query
-        name: page
+        name: offset
         type: integer
-      - description: Number of items per page
+      - description: number of items per page
         in: query
         name: limit
         type: integer
+      - description: a single or multiple category code separated by commas
+        in: query
+        name: category
+        type: string
+      - description: a float value, used in conjunction with the price operator
+        in: query
+        name: price
+        type: string
+      - description: 'the price operator, one of: eq, lt, lte, gte'
+        in: query
+        name: operator
+        type: string
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
@@ -71,6 +85,14 @@ paths:
       - catalog
   /catalog/{code}:
     get:
+      parameters:
+      - description: product code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
@@ -85,6 +107,8 @@ paths:
       - catalog
   /categories:
     get:
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
