@@ -105,7 +105,7 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	// for a filter, but whatever parameter not used by this endpoint is disregarded.
 	for _, filter := range filters {
 		if err := filter.Parse(r); err != nil {
-			slog.Error("failed to parse query parameters", slog.Any("error", err))
+			h.logger.Error("failed to parse query parameters", slog.Any("error", err))
 			api.RespondError(w, api.Response{Status: http.StatusBadRequest, Message: "invalid query parameter(s)"})
 
 			return
