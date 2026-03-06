@@ -26,6 +26,9 @@ func TestLevel(t *testing.T) {
 	}, {
 		current:  "",
 		expected: slog.LevelDebug,
+	}, {
+		current:  "critical",
+		expected: slog.LevelDebug,
 	}}
 
 	for _, test := range tc {
