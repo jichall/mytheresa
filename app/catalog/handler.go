@@ -98,7 +98,7 @@ func (h *CatalogHandler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	filters := filter.FilterMap{
 		"page":     &filter.PageFilter{},
 		"price":    &filter.PriceFilter{},
-		"category": &filter.PriceFilter{},
+		"category": &filter.CategoryFilter{},
 	}
 
 	// the idea here is only error for the client if it has provided an invalid value
