@@ -56,7 +56,7 @@ func (r *ProductsRepository) GetWithFilters(ctx context.Context, filters []datab
 
 	database.Sort(filters)
 	for _, scope := range filters {
-		scope.Apply(tx)
+		tx = tx.Scopes(scope.Apply)
 	}
 
 	err := tx.Find(&products).Error
